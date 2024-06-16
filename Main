@@ -1,0 +1,64 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+url = "https://raw.githubusercontent.com/plotly/datasets/master/diabetes.csv"
+data = pd.read_csv(url)
+
+print(data.head())
+print(data.info())
+print(data.describe())
+print(data.isnull().sum())
+
+data.hist(figsize=(12, 10))
+plt.tight_layout()
+plt.show()
+
+sns.pairplot(data, hue='Outcome')
+plt.show()
+
+plt.figure(figsize=(10, 8))
+sns.heatmap(data.corr(), annot=True, cmap='coolwarm', fmt='.2f')
+plt.show()
+
+sns.countplot(x='Outcome', data=data)
+plt.show()
+
+print(data['Outcome'].value_counts())
+
+X = data.drop("Outcome", axis=1)
+y = data["Outcome"]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+model = LogisticRegression(random_state=42)
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+conf_matrix = confusion_matrix(y_test, y_pred)
+class_report = classification_report(y_test, y_pred)
+
+print(f"Accuracy: {accuracy}")
+print("Confusion Matrix:")
+print(conf_matrix)
+print("Classification Report:")
+print(class_report)
+
+
+new_patient_data = [[5, 116, 74, 0, 0, 25.6, 0.201, 30]]
+new_patient_data = scaler.transform(new_patient_data)
+
+prediction = model.predict(new_patient_data)
+
+if prediction[0] == 1:
+    print("The patient has diabetes.")
+else:
+    print("The patient does not have diabetes.")
